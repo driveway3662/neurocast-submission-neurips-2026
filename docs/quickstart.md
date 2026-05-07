@@ -1,0 +1,109 @@
+# Quickstart
+
+Get started with the podcast benchmark framework in minutes.
+
+## Setup
+
+To download data and set up your local virtual environment:
+
+```bash
+./setup.sh
+```
+
+This will:
+- Create a Python virtual environment (conda or venv)
+- Install the core benchmark runtime dependencies
+- Download the necessary podcast listening data
+
+**Setup options**:
+```bash
+./setup.sh --gpu         # Install GPU dependencies (CUDA packages)
+./setup.sh --dev         # Install dev dependencies (testing), skip data download
+./setup.sh --docs        # Install documentation site dependencies
+./setup.sh --paper       # Install paper result and atlas visualization dependencies
+./setup.sh --audio       # Install audio/prosody transcription dependencies
+./setup.sh --data        # Install dataset preprocessing dependencies
+./setup.sh --diver-full  # Install vendored DIVER data loading dependencies
+./setup.sh --all         # Install all optional dependencies
+./setup.sh --env-name NAME # Custom environment name (default: decoding_env)
+```
+
+You can combine options, for example `./setup.sh --dev --paper`, to install
+only the optional workflows you need.
+
+## Training Your First Model
+
+The framework comes with several pre-configured models you can train immediately.
+
+### 1. Neural Convolutional Decoder
+
+This recreates the decoder from [Goldstein et al. 2022](https://www.nature.com/articles/s41593-022-01026-4), which decodes word embeddings directly from neural data:
+
+```bash
+make train-config CONFIG=configs/baselines/word_embedding_decoding_task/neural_conv_decoder/gpt2_supersubject.yml
+```
+
+### 2. Foundation Models
+
+Evaluate one of the pre-configured foundation models on word embedding
+decoding, note you will need to download their weights from their respective sources first:
+
+- **BrainBERT**: https://github.com/czlwang/BrainBERT
+- **POPT**: https://github.com/czlwang/PopulationTransformer
+- **DIVER**: https://github.com/DIVER-Project/DIVER-1
+
+```bash
+python main.py --config configs/foundation_models/popt/word_embedding/supersubject.yml
+```
+
+Available production foundation model configs include:
+
+- **BrainBERT**: `configs/foundation_models/brainbert/<task>/<variant>.yml`
+- **DIVER**: `configs/foundation_models/diver/<task>/<variant>.yml`
+- **POPT**: `configs/foundation_models/popt/<task>/<variant>.yml`
+
+For example:
+
+```bash
+python main.py --config configs/foundation_models/brainbert/word_embedding/supersubject.yml
+python main.py --config configs/foundation_models/diver/word_embedding/supersubject.yml
+python main.py --config configs/foundation_models/popt/word_embedding/supersubject.yml
+```
+
+Each foundation model currently follows the same task layout, including
+`word_embedding`, `whisper_embedding`, `llm_embedding_pretraining`,
+`llm_decoding`, `sentence_onset`, `gpt_surprise`,
+`gpt_surprise_multiclass`, `content_noncontent`, `pos`, `iu_boundary`, and
+`volume_level`.
+
+## Results
+
+Training results will be saved to:
+- `results/` - Performance metrics and CSV files
+- `checkpoints/` - Saved model checkpoints
+- `event_logs/` - TensorBoard logs
+
+See [Benchmark Results](baseline-results.md) for performance benchmarks across all tasks.
+
+## Configuration
+
+To modify data, behavior, or hyperparameters:
+
+Edit the relevant configuration file in `configs/`:
+- `configs/baselines/<task_name>/<baseline_family>/` - Task-grouped baseline configs, including supersubject, per-subject, and per-region variants
+- `configs/examples/example_foundation_model/` - Example foundation-model configs
+- `configs/foundation_models/` - Production foundation-model configs
+- `configs/controls/llm_decoding/` - Control runs for LLM decoding
+- `configs/hpo/` - Hyperparameter search grids
+
+Model implementations can be found in the `models/` directory.
+
+See [Onboarding a New Model](onboarding-model.md) for details on configuration options.
+
+## Next Steps
+
+- [Add your own model](onboarding-model.md)
+- [Create a custom task](adding-task.md)
+- [View all available tasks](task-reference.md)
+- [Compare against baseline results](baseline-results.md)
+- [Explore the API](api-reference.md)
